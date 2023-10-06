@@ -16,9 +16,15 @@ class TestDto
     #[ParseMap(type: InnerTestDto::class)]
     public InnerTestDto $inner;
 
+    /**
+     * @var array<string>
+     */
     #[ParseMap(type: 'array<string>')]
     public array $stringArray;
 
+    /**
+     * @var array<int>
+     */
     #[ParseMap(type: 'array<int>')]
     public array $intArray;
 
@@ -28,6 +34,9 @@ class TestDto
     #[ParseMap(type: 'bool')]
     public bool $fromOtherType;
 
+    /**
+     * @var array<InnerTestDto>
+     */
     #[ParseMap(type: 'array<Enlumop\JsonMapper\Test\InnerTestDto>')]
     public array $objectsArray;
 }

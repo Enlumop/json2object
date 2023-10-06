@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Enlumop\JsonMapper\Test;
 
-class ToJsonObject
+class TestJsonData
 {
     public static function create(): string
     {
@@ -22,6 +22,11 @@ class ToJsonObject
             $inner,
         ];
 
-        return json_encode($dto);
+        $json = json_encode($dto);
+        if ($json) {
+            return $json;
+        }
+
+        return '{}';
     }
 }

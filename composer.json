@@ -1,6 +1,6 @@
 {
-    "name": "enlumop/json-parser",
-    "description": "Easy to use json parser",
+    "name": "enlumop/json2obj",
+    "description": "Easy to use json to object conversion with target class support",
     "type": "library",
     "license": "MIT",
     "autoload": {
