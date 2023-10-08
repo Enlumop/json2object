@@ -4,3 +4,4 @@ composer.phar
 testing.php
 .php-cs-fixer.cache
 .vscode
+.phpunit.result.cache

@@ -28,20 +28,21 @@
     },
     "require-dev": {
         "phpstan/phpstan": "^1.10",
-        "symfony/dotenv": "^6.3",
-        "symfony/console": "^6.3",
         "phpunit/phpunit": "^10.3",
         "fakerphp/faker": "^1.23",
         "friendsofphp/php-cs-fixer": "^3.34"
     },
     "scripts": {
         "analyse": "@phpstan",
-        "phpstan": "vendor/bin/phpstan analyse tests src --level 9",
+        "phpstan": "vendor/bin/phpstan",
         "cs-fix": "vendor/bin/php-cs-fixer fix src",
-        "test": "vendor/bin/phpunit tests",
+        "test": "vendor/bin/phpunit",
         "checks": [
             "@test",
             "@phpstan"
         ]
+    },
+    "config": {
+        "optimize-autoloader": true
     }
 }

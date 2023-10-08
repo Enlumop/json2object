@@ -8,20 +8,6 @@ final class JsonMapReflectionsValidator
 {
     private function __construct() {}
 
-    public static function checkProperty(\ReflectionProperty $property): void
-    {
-        $propertyName = $property->getName();
-        $class = $property->getDeclaringClass()->getNamespaceName();
-
-        if ($property->isReadOnly()) {
-            throw new \InvalidArgumentException("The property {$class}\${$propertyName} is readonly and cannot be set.");
-        }
-
-        if (!$property->isPublic()) {
-            throw new \InvalidArgumentException("The property {$class}\${$propertyName} is not public. Must be public");
-        }
-    }
-
     /**
      * @param class-string $class
      */

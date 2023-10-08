@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Enlumop\JsonMapper;
 
-use Enlumop\JsonMapper\Attribute\ParseMap;
+use Enlumop\JsonMapper\Attribute\JsonMap;
 
 /**
  * @template T of object
@@ -15,6 +15,8 @@ class JsonConventer
      * @var T
      */
     private $templateObject;
+
+    private \ReflectionClass $refClass;
 
     /**
      * Undocumented function.
@@ -33,27 +35,40 @@ class JsonConventer
     {
         JsonMapReflectionsValidator::checkClassName($this->targetClass);
 
-        $reflectionClass = new \ReflectionClass($this->targetClass);
-        $this->templateObject = $reflectionClass->newInstance();
+        $this->refClass = new \ReflectionClass($this->targetClass);
+        $this->templateObject = $this->refClass->newInstance();
         $jsonObject = $this->getJsonObject();
 
-        foreach ($reflectionClass->getProperties() as $property) {
-            $attributes = $property->getAttributes(ParseMap::class);
+        /**
+         * @var \ReflectionProperty $property
+         */
+        foreach ($this->refClass->getProperties() as $property) {
+            $attributes = $property->getAttributes(JsonMap::class);
 
             if (empty($attributes)) {
                 return $this->templateObject;
             }
-            JsonMapReflectionsValidator::checkProperty($property);
-            $propertyName = $property->getName();
 
             $attr = $attributes[0]->newInstance();
-            $type = $attr->type ?? 'string';
+
+            $type = $this->determinateType($attr, $property);
             $jsonProperty = $attr->jsonPropertyName ?? $property->getName();
 
-            $this->setTemplateProperty($type, $propertyName, $jsonObject, $jsonProperty);
+            $this->setTemplateProperty($type, $property, $jsonObject, $jsonProperty);
         }
 
         return $this->templateObject;
+    }
+
+    private function determinateType(JsonMap $attr, \ReflectionProperty $property): string
+    {
+        $refType = $property->getType();
+        $propertyType = null;
+        if ($refType instanceof \ReflectionNamedType) {
+            $propertyType = $refType->getName();
+        }
+
+        return $attr->type ?? $propertyType ?? 'mixed';
     }
 
     private function getJsonObject(): object
@@ -66,46 +81,63 @@ class JsonConventer
         return $json;
     }
 
-    private function setTemplateProperty(string $type, string $propertyName, object $jsonObject, string $jsonProperty): void
-    {
+    private function setTemplateProperty(
+        string $type,
+        \ReflectionProperty $property,
+        object $jsonObject,
+        string $jsonProperty
+    ): void {
         if (class_exists($type)) {
-            $this->templateObject->{$propertyName} = json2Obj($type, $jsonObject->{$jsonProperty});
+            $relatedObject = json2Obj($type, $jsonObject->{$jsonProperty});
+            $this->setRegularValue($relatedObject, 'mixed', $property);
         } elseif (str_starts_with($type, 'array')) {
             $typeArray = $this->getArrayType($type);
-            $this->templateObject->{$propertyName} = [];
-            $this->mapArray($jsonObject, $jsonProperty, $typeArray, $propertyName);
+            $this->mapArray($jsonObject, $jsonProperty, $typeArray, $property);
         } else {
-            $this->setRegularValue($jsonObject->{$jsonProperty}, $type, $propertyName);
+            $this->setRegularValue($jsonObject->{$jsonProperty}, $type, $property);
         }
     }
 
-    private function mapArray(object $jsonObject, string $jsonProperty, string $typeArray, string $templateProperty): void
-    {
+    private function mapArray(
+        object $jsonObject,
+        string $jsonProperty,
+        string $typeArray,
+        \ReflectionProperty $property
+    ): void {
+        $newArr = [];
         foreach ($jsonObject->{$jsonProperty} as $jsonArrayValue) {
             if (class_exists($typeArray)) {
-                $this->templateObject->{$templateProperty}[] = json2Obj($typeArray, $jsonArrayValue);
+                $newArr[] = json2Obj($typeArray, $jsonArrayValue);
             } else {
-                $this->addRegularValue($jsonArrayValue, $typeArray, $templateProperty);
+                $newArr[] = $this->getRegularValue($jsonArrayValue, $typeArray);
             }
         }
+
+        $this->setRegularValue($newArr, 'mixed', $property);
     }
 
     private function getArrayType(string $arrayWithType): string
     {
         $typeArray = explode('<', $arrayWithType);
+        $type = $typeArray[1] ?? 'mixed';
 
-        return str_replace('>', '', $typeArray[1]);
+        return str_replace('>', '', $type);
     }
 
-    private function setRegularValue(mixed $value, string $type, string $templateProperty): void
+    private function setRegularValue(mixed $value, string $type, \ReflectionProperty $property): void
     {
-        settype($value, $type);
-        $this->templateObject->{$templateProperty} = $value;
+        $value = $this->getRegularValue($value, $type);
+
+        $property->setAccessible(true);
+        $property->setValue($this->templateObject, $value);
     }
 
-    private function addRegularValue(mixed $value, string $type, string $templateProperty): void
+    private function getRegularValue(mixed $value, string $type): mixed
     {
-        settype($value, $type);
-        $this->templateObject->{$templateProperty}[] = $value;
+        if ('mixed' !== $type) {
+            settype($value, $type);
+        }
+
+        return $value;
     }
 }
