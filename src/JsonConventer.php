@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Enlumop\JsonMapper;
 
-use Enlumop\JsonMapper\Attribute\ParseMap;
+use Enlumop\JsonMapper\Attribute\JsonMap;
 
 /**
  * @template T of object
@@ -37,8 +37,11 @@ class JsonConventer
         $this->templateObject = $reflectionClass->newInstance();
         $jsonObject = $this->getJsonObject();
 
+        /**
+         * @var \ReflectionProperty $property
+         */
         foreach ($reflectionClass->getProperties() as $property) {
-            $attributes = $property->getAttributes(ParseMap::class);
+            $attributes = $property->getAttributes(JsonMap::class);
 
             if (empty($attributes)) {
                 return $this->templateObject;
@@ -47,13 +50,25 @@ class JsonConventer
             $propertyName = $property->getName();
 
             $attr = $attributes[0]->newInstance();
-            $type = $attr->type ?? 'string';
+
+            $type = $this->determinateType($attr, $property);
             $jsonProperty = $attr->jsonPropertyName ?? $property->getName();
 
             $this->setTemplateProperty($type, $propertyName, $jsonObject, $jsonProperty);
         }
 
         return $this->templateObject;
+    }
+
+    private function determinateType(JsonMap $attr, \ReflectionProperty $property): string
+    {
+        $refType = $property->getType();
+        $propertyType = null;
+        if ($refType instanceof \ReflectionNamedType) {
+            $propertyType = $refType->getName();
+        }
+
+        return $attr->type ?? $propertyType ?? 'mixed';
     }
 
     private function getJsonObject(): object
@@ -93,19 +108,24 @@ class JsonConventer
     private function getArrayType(string $arrayWithType): string
     {
         $typeArray = explode('<', $arrayWithType);
+        $type = $typeArray[1] ?? 'mixed';
 
-        return str_replace('>', '', $typeArray[1]);
+        return str_replace('>', '', $type);
     }
 
     private function setRegularValue(mixed $value, string $type, string $templateProperty): void
     {
-        settype($value, $type);
+        if ('mixed' !== $type) {
+            settype($value, $type);
+        }
         $this->templateObject->{$templateProperty} = $value;
     }
 
     private function addRegularValue(mixed $value, string $type, string $templateProperty): void
     {
-        settype($value, $type);
+        if ('mixed' !== $type) {
+            settype($value, $type);
+        }
         $this->templateObject->{$templateProperty}[] = $value;
     }
 }

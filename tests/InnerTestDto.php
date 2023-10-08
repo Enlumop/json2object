@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Enlumop\JsonMapper\Test;
 
-use Enlumop\JsonMapper\Attribute\ParseMap;
+use Enlumop\JsonMapper\Attribute\JsonMap;
 
 class InnerTestDto
 {
-    #[ParseMap(type: 'int')]
+    #[JsonMap(type: 'int')]
     public int $money;
 }

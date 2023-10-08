@@ -4,39 +4,42 @@ declare(strict_types=1);
 
 namespace Enlumop\JsonMapper\Test;
 
-use Enlumop\JsonMapper\Attribute\ParseMap;
+use Enlumop\JsonMapper\Attribute\JsonMap;
 
 class TestDto
 {
-    #[ParseMap(type: 'string')]
+    #[JsonMap(type: 'string')]
     public string $name;
-    #[ParseMap(type: 'int')]
+    #[JsonMap(type: 'int')]
     public int $age;
 
-    #[ParseMap(type: InnerTestDto::class)]
+    #[JsonMap(type: InnerTestDto::class)]
     public InnerTestDto $inner;
 
     /**
      * @var array<string>
      */
-    #[ParseMap(type: 'array<string>')]
+    #[JsonMap(type: 'array<string>')]
     public array $stringArray;
 
     /**
      * @var array<int>
      */
-    #[ParseMap(type: 'array<int>')]
+    #[JsonMap(type: 'array<int>')]
     public array $intArray;
 
-    #[ParseMap(jsonPropertyName: 'shortlyUserName')]
+    #[JsonMap(jsonPropertyName: 'shortlyUserName')]
     public string $shortName;
 
-    #[ParseMap(type: 'bool')]
+    #[JsonMap]
     public bool $fromOtherType;
+
+    #[JsonMap]
+    public mixed $mixedValue;
 
     /**
      * @var array<InnerTestDto>
      */
-    #[ParseMap(type: 'array<Enlumop\JsonMapper\Test\InnerTestDto>')]
+    #[JsonMap(type: 'array<'.InnerTestDto::class.'>')]
     public array $objectsArray;
 }
