@@ -21,9 +21,11 @@ class TestJsonMap
     protected bool $protectedValueTypeBool;
 
     #[JsonMap(type: 'bool')]
+    /** @phpstan-ignore-next-line */
     private bool $privateBool;
 
     #[JsonMap]
+    /** @phpstan-ignore-next-line */
     private bool $privateValueTypeBool;
 
     public function getProtectedBool(): bool

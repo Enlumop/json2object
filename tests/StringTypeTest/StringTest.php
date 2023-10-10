@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Enlumop\JsonMapper\Test\StringTypeTest;
 
+use Enlumop\JsonMapper\Test\BaseTypeTestTrait;
 use Faker\Factory;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-
-use function Enlumop\JsonMapper\json2Obj;
 
 /**
  * @internal
@@ -17,6 +15,10 @@ use function Enlumop\JsonMapper\json2Obj;
  */
 final class StringTest extends TestCase
 {
+    use BaseTypeTestTrait;
+
+    private string $testingClass = TestJsonMap::class;
+
     /**
      * @return array<int, array<int, mixed>>
      */
@@ -42,37 +44,5 @@ final class StringTest extends TestCase
         }
 
         return $data;
-    }
-
-    #[DataProvider('jsonProvider')]
-    public function testString(string $json, object $jsonObject): void
-    {
-        $myObj = json2Obj(TestJsonMap::class, $json);
-
-        $reflection = new \ReflectionClass($myObj);
-
-        $publicProperty = $reflection->getProperty('publicString');
-        $publicProperty->setAccessible(true);
-        self::assertSame($jsonObject->publicString, $publicProperty->getValue($myObj));
-
-        $protectedProperty = $reflection->getProperty('protectedString');
-        $protectedProperty->setAccessible(true);
-        self::assertSame($jsonObject->protectedString, $protectedProperty->getValue($myObj));
-
-        $privateProperty = $reflection->getProperty('privateString');
-        $privateProperty->setAccessible(true);
-        self::assertSame($jsonObject->privateString, $privateProperty->getValue($myObj));
-
-        $publicProperty = $reflection->getProperty('publicValueTypeString');
-        $publicProperty->setAccessible(true);
-        self::assertSame($jsonObject->publicValueTypeString, $publicProperty->getValue($myObj));
-
-        $protectedProperty = $reflection->getProperty('protectedValueTypeString');
-        $protectedProperty->setAccessible(true);
-        self::assertSame($jsonObject->protectedValueTypeString, $protectedProperty->getValue($myObj));
-
-        $privateProperty = $reflection->getProperty('privateValueTypeString');
-        $privateProperty->setAccessible(true);
-        self::assertSame($jsonObject->privateValueTypeString, $privateProperty->getValue($myObj));
     }
 }

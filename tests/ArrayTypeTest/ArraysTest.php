@@ -24,7 +24,8 @@ final class ArraysTest extends TestCase
     {
         $faker = Factory::create();
 
-        function generateStdClass(\Faker\Generator $faker): ObjectInArray
+        /** @phpstan-ignore-next-line */
+        function generateObject(\Faker\Generator $faker): ObjectInArray
         {
             $obj = new ObjectInArray();
             $obj->prop = $faker->randomNumber();
@@ -51,11 +52,16 @@ final class ArraysTest extends TestCase
                     $faker->boolean(),
                 ],
                 'objectArray' => [
-                    generateStdClass($faker),
-                    generateStdClass($faker),
-                    generateStdClass($faker),
-                    generateStdClass($faker),
-                    generateStdClass($faker),
+                    // @phpstan-ignore-next-line
+                    generateObject($faker),
+                    // @phpstan-ignore-next-line
+                    generateObject($faker),
+                    // @phpstan-ignore-next-line
+                    generateObject($faker),
+                    // @phpstan-ignore-next-line
+                    generateObject($faker),
+                    // @phpstan-ignore-next-line
+                    generateObject($faker),
                 ],
                 'mixedArray' => [
                     $faker->word(),
@@ -73,32 +79,29 @@ final class ArraysTest extends TestCase
         return $data;
     }
 
+    /** @phpstan-ignore-next-line */
     #[DataProvider('jsonProvider')]
+    /**
+     * @param array<string, mixed> $jsonArray
+     */
     public function testArrays(string $json, array $jsonArray): void
     {
         $myObj = json2Obj(TestJsonMap::class, $json);
 
         $reflection = new \ReflectionClass($myObj);
 
-        $property = $reflection->getProperty('stringArray');
-        $property->setAccessible(true);
-        self::assertSame($jsonArray['stringArray'], $property->getValue($myObj));
-
-        $property = $reflection->getProperty('intArray');
-        $property->setAccessible(true);
-        self::assertSame($jsonArray['intArray'], $property->getValue($myObj));
-
-        $property = $reflection->getProperty('boolArray');
-        $property->setAccessible(true);
-        self::assertSame($jsonArray['boolArray'], $property->getValue($myObj));
+        $reflection = new \ReflectionClass($myObj);
+        foreach ($reflection->getProperties() as $property) {
+            $propertyName = $property->getName();
+            if ('objectArray' !== $propertyName) {
+                $property->setAccessible(true);
+                self::assertSame($jsonArray[$propertyName], $property->getValue($myObj));
+            }
+        }
 
         foreach ($myObj->objectArray as $key => $obj) {
             self::assertIsObject($obj);
             self::assertSame($jsonArray['objectArray'][$key]->prop, $obj->prop);
         }
-
-        $property = $reflection->getProperty('mixedArray');
-        $property->setAccessible(true);
-        self::assertSame($jsonArray['mixedArray'], $property->getValue($myObj));
     }
 }

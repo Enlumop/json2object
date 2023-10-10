@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Enlumop\JsonMapper\Test\MixedTypeTest;
 
+use Enlumop\JsonMapper\Test\BaseTypeTestTrait;
 use Faker\Factory;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-
-use function Enlumop\JsonMapper\json2Obj;
 
 /**
  * @internal
@@ -17,6 +15,10 @@ use function Enlumop\JsonMapper\json2Obj;
  */
 final class MixedTest extends TestCase
 {
+    use BaseTypeTestTrait;
+
+    private string $testingClass = TestJsonMap::class;
+
     /**
      * @return array<int, array<int, mixed>>
      */
@@ -24,6 +26,7 @@ final class MixedTest extends TestCase
     {
         $faker = Factory::create();
 
+        /** @phpstan-ignore-next-line */
         function elements(\Faker\Generator $faker): array
         {
             return [
@@ -38,10 +41,15 @@ final class MixedTest extends TestCase
         for ($i = 0; $i < 5; ++$i) {
             /** @var string */
             $json = json_encode([
+                // @phpstan-ignore-next-line
                 'mixed1' => $faker->randomElement(elements($faker)),
+                // @phpstan-ignore-next-line
                 'mixed2' => $faker->randomElement(elements($faker)),
+                // @phpstan-ignore-next-line
                 'mixed3' => $faker->randomElement(elements($faker)),
+                // @phpstan-ignore-next-line
                 'mixed4' => $faker->randomElement(elements($faker)),
+                // @phpstan-ignore-next-line
                 'mixed5' => $faker->randomElement(elements($faker)),
             ]);
 
@@ -51,33 +59,5 @@ final class MixedTest extends TestCase
         }
 
         return $data;
-    }
-
-    #[DataProvider('jsonProvider')]
-    public function testMixed(string $json, object $jsonObject): void
-    {
-        $myObj = json2Obj(TestJsonMap::class, $json);
-
-        $reflection = new \ReflectionClass($myObj);
-
-        $publicProperty = $reflection->getProperty('mixed1');
-        $publicProperty->setAccessible(true);
-        self::assertSame($jsonObject->mixed1, $publicProperty->getValue($myObj));
-
-        $publicProperty = $reflection->getProperty('mixed2');
-        $publicProperty->setAccessible(true);
-        self::assertSame($jsonObject->mixed2, $publicProperty->getValue($myObj));
-
-        $publicProperty = $reflection->getProperty('mixed3');
-        $publicProperty->setAccessible(true);
-        self::assertSame($jsonObject->mixed3, $publicProperty->getValue($myObj));
-
-        $publicProperty = $reflection->getProperty('mixed4');
-        $publicProperty->setAccessible(true);
-        self::assertSame($jsonObject->mixed4, $publicProperty->getValue($myObj));
-
-        $publicProperty = $reflection->getProperty('mixed5');
-        $publicProperty->setAccessible(true);
-        self::assertSame($jsonObject->mixed5, $publicProperty->getValue($myObj));
     }
 }

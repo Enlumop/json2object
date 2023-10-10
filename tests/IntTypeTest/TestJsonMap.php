@@ -21,9 +21,11 @@ class TestJsonMap
     protected int $protectedValueTypeInt;
 
     #[JsonMap(type: 'int')]
+    /** @phpstan-ignore-next-line */
     private int $privateInt;
 
     #[JsonMap]
+    /** @phpstan-ignore-next-line */
     private int $privateValueTypeInt;
 
     public function getProtectedInt(): int

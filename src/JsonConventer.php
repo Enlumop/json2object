@@ -87,6 +87,9 @@ class JsonConventer
         object $jsonObject,
         string $jsonProperty
     ): void {
+        if (!property_exists($jsonObject, $jsonProperty)) {
+            return;
+        }
         if (class_exists($type)) {
             $relatedObject = json2Obj($type, $jsonObject->{$jsonProperty});
             $this->setRegularValue($relatedObject, 'mixed', $property);

@@ -10,7 +10,6 @@ class TestJsonMap
 {
     #[JsonMap]
     public mixed $mixed1;
-
     #[JsonMap]
     public mixed $mixed2;
     #[JsonMap]

@@ -21,9 +21,11 @@ class TestJsonMap
     protected string $protectedValueTypeString;
 
     #[JsonMap(type: 'string')]
+    /** @phpstan-ignore-next-line */
     private string $privateString;
 
     #[JsonMap]
+    /** @phpstan-ignore-next-line */
     private string $privateValueTypeString;
 
     public function getProtectedString(): string

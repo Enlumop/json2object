@@ -14,7 +14,7 @@ final class JsonMapReflectionsValidator
     public static function checkClassName(string $class): void
     {
         if (!class_exists($class)) {
-            throw new \InvalidArgumentException('Class name must be a string type');
+            throw new \InvalidArgumentException("Class {$class} is not exists");
         }
     }
 }
